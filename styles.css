@@ -1,0 +1,129 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f0f2f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #1a73e8;
+    margin-bottom: 20px;
+}
+
+.number-selector {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.pair-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.pair-item label {
+    display: inline-block;
+    margin-right: 10px;
+    min-width: 80px;
+}
+
+.pair-selects {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.pair-selects select {
+    width: 80px;
+    margin-bottom: 0;
+}
+
+.button-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.calculate-btn {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.calculate-btn:hover {
+    background-color: #0d62c7;
+}
+
+.calculate-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.results-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.results-container.active {
+    display: block;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.results-grid span {
+    display: inline-block;
+    background-color: #e9ecef;
+    padding: 5px;
+    text-align: center;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 14px;
+} 

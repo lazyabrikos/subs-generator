@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор чисел</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Выбор чисел</h1>
+        
+        <div class="number-selector">
+            <label for="n-select">Выберите число N (от 5 до 7):</label>
+            <select id="n-select">
+                <option value="">Выберите число</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+            </select>
+        </div>
+
+        <div id="pairs-container" class="pairs-container">
+            <!-- Pairs will be added here dynamically -->
+        </div>
+
+        <div class="button-container">
+            <button id="calculate-btn" class="calculate-btn" disabled>Рассчитать</button>
+        </div>
+
+        <div id="results-container" class="results-container">
+            <!-- Results will be displayed here -->
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
