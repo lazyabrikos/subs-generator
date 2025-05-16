@@ -1,0 +1,4 @@
+com/example/arxcalculator/ArxCalculatorApplication.class
+com/example/arxcalculator/controller/CalculationController.class
+com/example/arxcalculator/model/CalculationRequest.class
+com/example/arxcalculator/service/ArxCalculationService.class

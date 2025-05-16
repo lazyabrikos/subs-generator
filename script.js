@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
             calculateBtn.disabled = true;
             calculateBtn.textContent = 'Вычисление...';
             
-            // Send POST request to server
-            const response = await fetch('http://backend:8080/api/calculate', {
+            // Send POST request to C++ backend server on port 8081
+            const apiUrl = `http://${window.location.hostname}:8081/api/calculate`;
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,0 +1,58 @@
+FROM alpine:3.18 AS builder
+
+# Установка зависимостей для сборки
+RUN apk add --no-cache \
+    build-base \
+    cmake \
+    git \
+    boost-dev \
+    asio-dev \
+    openssl-dev \
+    zlib-dev
+
+# Создаем рабочую директорию
+WORKDIR /app
+
+# Клонируем Crow - легковесный фреймворк для C++ веб-серверов
+RUN git clone https://github.com/CrowCpp/Crow.git && \
+    cd Crow && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF && \
+    make install
+
+# Клонируем nlohmann/json - популярную JSON библиотеку для C++
+RUN git clone https://github.com/nlohmann/json.git && \
+    cd json && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DJSON_BuildTests=OFF && \
+    make install
+
+# Копируем исходный код
+COPY arx_backend.cpp /app/
+
+# Компилируем приложение
+RUN g++ -std=c++17 -o arx_backend arx_backend.cpp -lpthread -lboost_system -lssl -lcrypto
+
+# Создаем итоговый образ
+FROM alpine:3.18
+
+# Устанавливаем необходимые библиотеки времени выполнения
+RUN apk add --no-cache \
+    libstdc++ \
+    boost-system \
+    openssl \
+    ca-certificates
+
+# Создаем рабочую директорию
+WORKDIR /app
+
+# Копируем скомпилированное приложение из промежуточного образа
+COPY --from=builder /app/arx_backend /app/
+
+# Открываем порт
+EXPOSE 8081
+
+# Запускаем приложение
+CMD ["./arx_backend"] 
