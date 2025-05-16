@@ -2,11 +2,11 @@
 
 # Останавливаем контейнеры
 echo "Останавливаем контейнеры..."
-sudo docker stop arx-calculator-frontend arx-calculator-backend 2>/dev/null || true
+sudo docker stop arx-calculator-frontend arx-calculator-cpp-backend 2>/dev/null || true
 
 # Удаляем контейнеры
 echo "Удаляем контейнеры..."
-sudo docker rm arx-calculator-frontend arx-calculator-backend 2>/dev/null || true
+sudo docker rm arx-calculator-frontend arx-calculator-cpp-backend 2>/dev/null || true
 
 # Удаляем сеть
 echo "Удаляем сеть..."

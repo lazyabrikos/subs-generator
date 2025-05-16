@@ -2,64 +2,59 @@
 #include <vector>
 #include <crow.h>
 #include <nlohmann/json.hpp>
+#include <bitset>
 
 using json = nlohmann::json;
 using namespace std;
 
-// Функция для поворота битов - приведена в соответствие с Java
 unsigned char rotateBits(unsigned char x, int k) {
-    // Маскируем до 4 бит
-    x = (x & 0x0F);
-    // Ротация влево на k бит
-    unsigned char result = ((x << k) | (x >> (4 - k)));
-    // Маскируем результат до 4 бит (как в Java)
-    return result & 0x0F;
+     x = (x & 0x0F);
+    x = ((x << k) | (x >> (4 - k)));
+    return x;
 }
 
-// Функция для одной ARX итерации - приведена в соответствие с Java
 void arxIteration(unsigned char X_l, unsigned char X_r, unsigned char &X_l_next, unsigned char &X_r_next, int r, int s) {
-    // Ротация X_r на r бит
-    unsigned char X_r_rotated = rotateBits(X_r, r);
-    
-    // В Java делается маскирование до 8 бит: z = (x_l_cur + X_r_rotated) & 0xFF;
-    unsigned char z = (X_l + X_r_rotated) & 0xFF;
-    
-    // Ротация z на s бит
+unsigned char X_r_rotated = rotateBits(X_r, r);
+    unsigned char z = (X_l + X_r_rotated);
     unsigned char z_rotated = rotateBits(z, s);
-    
-    // В Java делается маскирование: (z_rotated ^ x_r_cur) & 0xFF;
-    X_r_next = (z_rotated ^ X_r) & 0xFF;
-    
+    X_r_next = (z_rotated ^ X_r);
     X_l_next = z;
 }
 
-// Функция для полного ARX вычисления с указанными комбинациями
 vector<int> calculateARX(const vector<pair<int, int>>& combinations) {
-    vector<int> result;
+    vector<unsigned char> result;
 
     for (unsigned char x_l = 0; x_l < 16; x_l++) {
         for (unsigned char x_r = 0; x_r < 16; x_r++) {
+            
             unsigned char x_l_cur = x_l;
             unsigned char x_r_cur = x_r;
+            unsigned char start_number = (x_l_cur << 4) | x_r_cur;
 
-            for (const auto& combination : combinations) {
+            for (int i = 0; i < 5; i++) {
                 unsigned char x_l_next = 0;
                 unsigned char x_r_next = 0;
 
-                arxIteration(x_l_cur, x_r_cur, x_l_next, x_r_next, combination.first, combination.second);
+                arxIteration(x_l_cur, x_r_cur, x_l_next, x_r_next, combinations[i].first, combinations[i].second);
 
                 x_l_cur = x_l_next;
                 x_r_cur = x_r_next;
             }
 
-            // В Java делается маскирование: ((x_l_cur & 0x0F) << 4) | (x_r_cur & 0x0F);
-            // И мы тоже делаем маскирование, чтобы гарантировать, что значения такие же
-            unsigned char result_number = ((x_l_cur & 0x0F) << 4) | (x_r_cur & 0x0F);
-            result.push_back(static_cast<int>(result_number));
+            unsigned char result_number = (x_l_cur << 4) | x_r_cur;
+            result.push_back(result_number);
+            
+            // Output result_number as bit sequence
+            
         }
     }
-
-    return result;
+    
+    vector<int> int_result;
+    for (unsigned char val : result) {
+        int_result.push_back(static_cast<int>(val));
+    }
+    
+    return int_result;
 }
 
 int main() {

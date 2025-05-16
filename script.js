@@ -4,6 +4,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculate-btn');
     const resultsContainer = document.getElementById('results-container');
 
+    // Добавляем элемент для логов
+    const debugLogContainer = document.createElement('div');
+    debugLogContainer.id = 'debug-log';
+    debugLogContainer.style.display = 'none';
+    document.body.appendChild(debugLogContainer);
+
+    // Функция для логирования
+    function logDebug(message) {
+        console.log(message);
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `${new Date().toISOString()}: ${message}`;
+        debugLogContainer.appendChild(logEntry);
+    }
+
+    // Включить логи для отладки
+    window.showDebugLogs = function() {
+        debugLogContainer.style.display = 'block';
+    }
+
     // Array of possible rotations as defined in the C++ code
     const ROTATES = [
         [1, 1],
@@ -54,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const n = parseInt(nSelect.value);
         if (!n) return;
 
+        logDebug(`Начало расчета для ${n} пар`);
+
         // Collect selected pairs
         const combinations = [];
         let pairsText = '';
@@ -64,28 +85,50 @@ document.addEventListener('DOMContentLoaded', () => {
             pairsText += `(${first}, ${second})${i < n - 1 ? ', ' : ''}`;
         }
 
+        logDebug(`Собраны пары: ${pairsText}`);
+
         try {
             // Show loading state
             calculateBtn.disabled = true;
             calculateBtn.textContent = 'Вычисление...';
             
-            // Send POST request to C++ backend server on port 8081
-            const apiUrl = `http://${window.location.hostname}:8081/api/calculate`;
+            // Используем относительный URL для API (NGINX проксирует запросы)
+            const apiUrl = '/api/calculate';
+            logDebug(`Отправка запроса на API: ${apiUrl}`);
+            
+            // Подготавливаем данные для отправки
+            const requestData = {
+                combinations: combinations
+            };
+            logDebug(`Данные для отправки: ${JSON.stringify(requestData)}`);
+            
+            // Отправляем запрос на API
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    combinations: combinations
-                })
+                body: JSON.stringify(requestData)
             });
 
+            logDebug(`Статус ответа: ${response.status} ${response.statusText}`);
+
             if (!response.ok) {
-                throw new Error('Ошибка сервера');
+                throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
             }
 
-            const results = await response.json();
+            // Получаем данные ответа
+            const responseText = await response.text();
+            logDebug(`Текст ответа: ${responseText.substring(0, 100)}...`);
+            
+            let results;
+            try {
+                results = JSON.parse(responseText);
+                logDebug(`Успешно распарсили JSON: ${results.length} элементов`);
+            } catch (parseError) {
+                logDebug(`Ошибка парсинга JSON: ${parseError}`);
+                throw new Error(`Ошибка при обработке ответа: ${parseError.message}`);
+            }
             
             // Display results
             resultsContainer.innerHTML = `
@@ -98,12 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         return `<span title="Индекс: ${idx}, Значение: ${val}">${val}</span>`;
                     }).join('')}
                 </div>
+                <div class="debug-info">
+                    <button onclick="window.showDebugLogs()">Показать отладочную информацию</button>
+                </div>
             `;
             resultsContainer.classList.add('active');
         } catch (error) {
+            logDebug(`Произошла ошибка: ${error.toString()}`);
+            
             resultsContainer.innerHTML = `
                 <h3>Ошибка:</h3>
                 <p>${error.message}</p>
+                <p>Проверьте работу сервера API и обновите страницу.</p>
+                <div class="debug-info">
+                    <button onclick="window.showDebugLogs()">Показать отладочную информацию</button>
+                </div>
             `;
             resultsContainer.classList.add('active');
         } finally {

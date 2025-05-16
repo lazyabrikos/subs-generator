@@ -1,5 +1,32 @@
 FROM nginx:alpine
+
+# Копируем файлы фронтенда
 COPY index.html /usr/share/nginx/html/
 COPY script.js /usr/share/nginx/html/
 COPY styles.css /usr/share/nginx/html/
+
+# Создаем конфигурацию NGINX для проксирования API
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    \
+    location / { \
+        root /usr/share/nginx/html; \
+        index index.html; \
+        try_files $uri $uri/ /index.html; \
+    } \
+    \
+    # Проксирование API-запросов на бэкенд \
+    location /api/ { \
+        proxy_pass http://arx-calculator-cpp-backend:8081; \
+        proxy_http_version 1.1; \
+        proxy_set_header Upgrade $http_upgrade; \
+        proxy_set_header Connection "upgrade"; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; \
+        proxy_set_header X-Forwarded-Proto $scheme; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
 EXPOSE 80 
