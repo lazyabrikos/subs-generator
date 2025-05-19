@@ -121,10 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const responseText = await response.text();
             logDebug(`Текст ответа: ${responseText.substring(0, 100)}...`);
             
-            let results;
+            let responseData;
             try {
-                results = JSON.parse(responseText);
-                logDebug(`Успешно распарсили JSON: ${results.length} элементов`);
+                responseData = JSON.parse(responseText);
+                logDebug(`Успешно распарсили JSON: ${responseData.substitution.length} элементов`);
             } catch (parseError) {
                 logDebug(`Ошибка парсинга JSON: ${parseError}`);
                 throw new Error(`Ошибка при обработке ответа: ${parseError.message}`);
@@ -135,9 +135,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3>Результаты:</h3>
                 <p>Используемые пары: ${pairsText}</p>
                 <p>Количество итераций: ${n}</p>
-                <p>Сгенерированная подстановка (${results.length} чисел):</p>
+                <p>Характеристики:</p>
+                <ul>
+                    <li>Разностная характеристика: ${responseData.characteristics.diffCharacteristic}</li>
+                    <li>Линейная характеристика: ${responseData.characteristics.linearCharacteristic}</li>
+                    <li>Степень нелинейности: ${responseData.characteristics.nonlinearDegree}</li>
+                </ul>
+                <p>Сгенерированная подстановка (${responseData.substitution.length} чисел):</p>
                 <div class="results-grid">
-                    ${results.map((val, idx) => {
+                    ${responseData.substitution.map((val, idx) => {
                         return `<span title="Индекс: ${idx}, Значение: ${val}">${val}</span>`;
                     }).join('')}
                 </div>
