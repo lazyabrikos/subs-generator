@@ -51,6 +51,9 @@ WORKDIR /app
 # Копируем скомпилированное приложение из промежуточного образа
 COPY --from=builder /app/arx_backend /app/
 
+# Копируем файл с матрицей
+COPY D_matrix_nolinear.txt /app/
+
 # Открываем порт
 EXPOSE 8081
 
