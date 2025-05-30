@@ -13,7 +13,7 @@ RUN apk add --no-cache \
 # Создаем рабочую директорию
 WORKDIR /app
 
-# Клонируем Crow - легковесный фреймворк для C++ веб-серверов
+# Клонируем Crow
 RUN git clone https://github.com/CrowCpp/Crow.git && \
     cd Crow && \
     mkdir build && \
@@ -21,7 +21,7 @@ RUN git clone https://github.com/CrowCpp/Crow.git && \
     cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF && \
     make install
 
-# Клонируем nlohmann/json - популярную JSON библиотеку для C++
+# Клонируем nlohmann/json
 RUN git clone https://github.com/nlohmann/json.git && \
     cd json && \
     mkdir build && \
