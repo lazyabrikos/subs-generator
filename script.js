@@ -3,22 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pairsContainer = document.getElementById('pairs-container');
     const calculateBtn = document.getElementById('calculate-btn');
     const resultsContainer = document.getElementById('results-container');
+    const downloadCsvBtn = document.getElementById('download-csv-btn');
 
-    const debugLogContainer = document.createElement('div');
-    debugLogContainer.id = 'debug-log';
-    debugLogContainer.style.display = 'none';
-    document.body.appendChild(debugLogContainer);
-
-    function logDebug(message) {
-        console.log(message);
-        const logEntry = document.createElement('div');
-        logEntry.textContent = `${new Date().toISOString()}: ${message}`;
-        debugLogContainer.appendChild(logEntry);
-    }
-
-    window.showDebugLogs = function() {
-        debugLogContainer.style.display = 'block';
-    }
+    let lastResultsData = null;
 
     const ROTATES = [
         [1, 1],
@@ -68,9 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const n = parseInt(nSelect.value);
         if (!n) return;
 
-        logDebug(`Начало расчета для ${n} пар`);
-
-        // Collect selected pairs
         const combinations = [];
         let pairsText = '';
         for (let i = 0; i < n; i++) {
@@ -80,19 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
             pairsText += `(${first}, ${second})${i < n - 1 ? ', ' : ''}`;
         }
 
-        logDebug(`Собраны пары: ${pairsText}`);
-
         try {
             calculateBtn.disabled = true;
             calculateBtn.textContent = 'Вычисление...';
             
             const apiUrl = '/api/calculate';
-            logDebug(`Отправка запроса на API: ${apiUrl}`);
             
             const requestData = {
                 combinations: combinations
             };
-            logDebug(`Данные для отправки: ${JSON.stringify(requestData)}`);
             
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -102,85 +82,126 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(requestData)
             });
 
-            logDebug(`Статус ответа: ${response.status} ${response.statusText}`);
-
             if (!response.ok) {
                 throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
             }
 
             const responseText = await response.text();
-            logDebug(`Текст ответа: ${responseText.substring(0, 100)}...`);
             
             let responseData;
             try {
                 responseData = JSON.parse(responseText);
-                logDebug(`Успешно распарсили JSON: ${responseData.substitution.length} элементов`);
             } catch (parseError) {
-                logDebug(`Ошибка парсинга JSON: ${parseError}`);
                 throw new Error(`Ошибка при обработке ответа: ${parseError.message}`);
             }
             
-            resultsContainer.innerHTML = `
-                <h3>Результаты:</h3>
-                <p>Используемые пары: ${pairsText}</p>
-                <p>Количество итераций: ${n}</p>
-                <p>Характеристики:</p>
-                <ul>
-                    <li>Разностная характеристика: ${responseData.characteristics.diffCharacteristic}</li>
-                    <li>Линейная характеристика: ${responseData.characteristics.linearCharacteristic}</li>
-                    <li>Степень нелинейности: ${responseData.characteristics.nonlinearDegree}</li>
-                </ul>
-                <p>Сгенерированная подстановка (${responseData.substitution.length} чисел):</p>
-                <div class="results-grid">
-                    ${responseData.substitution.map((val, idx) => {
-                        return `<span title="Индекс: ${idx}, Значение: ${val}">${val}</span>`;
-                    }).join('')}
-                </div>
-                <div class="debug-info">
-                    <button onclick="window.showDebugLogs()">Показать отладочную информацию</button>
-                </div>
-            `;
-            resultsContainer.classList.add('active');
+            lastResultsData = responseData; // Store the results
+            displayResults(responseData);
         } catch (error) {
-            logDebug(`Произошла ошибка: ${error.toString()}`);
-            
             resultsContainer.innerHTML = `
                 <h3>Ошибка:</h3>
                 <p>${error.message}</p>
                 <p>Проверьте работу сервера API и обновите страницу.</p>
-                <div class="debug-info">
-                    <button onclick="window.showDebugLogs()">Показать отладочную информацию</button>
-                </div>
             `;
             resultsContainer.classList.add('active');
         } finally {
-            // Reset button state
             calculateBtn.disabled = false;
             calculateBtn.textContent = 'Вычислить';
         }
     });
+
+    function validatePairs() {
+        const nSelect = document.getElementById('n-select');
+        const calculateBtn = document.getElementById('calculate-btn');
+        
+        const n = parseInt(nSelect.value);
+        if (!n) {
+            calculateBtn.disabled = true;
+            return;
+        }
+        
+        let allValid = true;
+        for (let i = 0; i < n; i++) {
+            const firstElement = document.getElementById(`pair-${i}-first`);
+            const secondElement = document.getElementById(`pair-${i}-second`);
+            
+            if (!firstElement || !secondElement) {
+                allValid = false;
+                break;
+            }
+        }
+        
+        calculateBtn.disabled = !allValid;
+    }
+
+    function downloadCSV() {
+        if (!lastResultsData) {
+            console.error("No results data available to download.");
+            return;
+        }
+
+        const substitution = lastResultsData.substitution;
+        const characteristics = lastResultsData.characteristics;
+        
+        const substitutionString = substitution.join(',');
+        
+        const diffChar = characteristics.diffCharacteristic;
+        const linearChar = characteristics.linearCharacteristic;
+        const nonlinearDeg = characteristics.nonlinearDegree;
+        
+        let csvContent = "Substitution;DiffCharacteristic;LinearCharacteristic;NonlinearDegree\n";
+        csvContent += `${substitutionString};${diffChar};${linearChar};${nonlinearDeg}\n`;
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", "arx_substitution_characteristics.csv"); 
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    downloadCsvBtn.addEventListener('click', downloadCSV);
 });
 
-function validatePairs() {
-    const nSelect = document.getElementById('n-select');
-    const calculateBtn = document.getElementById('calculate-btn');
+function displayResults(data) {
+    const resultsContainer = document.getElementById('results-container');
+    const downloadCsvBtn = document.getElementById('download-csv-btn');
     
-    const n = parseInt(nSelect.value);
-    if (!n) {
-        calculateBtn.disabled = true;
-        return;
-    }
+    resultsContainer.innerHTML = '';
     
-    let allValid = true;
-    for (let i = 0; i < n; i++) {
-        const firstElement = document.getElementById(`pair-${i}-first`);
-        const secondElement = document.getElementById(`pair-${i}-second`);
-        
-        if (!firstElement || !secondElement) {
-            allValid = false;
-            break;
-        }
-    }
+    const substitution = data.substitution;
+    const characteristics = data.characteristics;
     
-    calculateBtn.disabled = !allValid;
+    const substitutionDiv = document.createElement('div');
+    substitutionDiv.innerHTML = '<h3>Подстановка:</h3>';
+    
+    const grid = document.createElement('div');
+    grid.className = 'results-grid';
+    
+    substitution.forEach(value => {
+        const span = document.createElement('span');
+        span.textContent = value;
+        grid.appendChild(span);
+    });
+    
+    substitutionDiv.appendChild(grid);
+    resultsContainer.appendChild(substitutionDiv);
+    
+    const characteristicsDiv = document.createElement('div');
+    characteristicsDiv.innerHTML = `
+        <h3>Характеристики:</h3>
+        <p>Дифференциальная характеристика: ${characteristics.diffCharacteristic}</p>
+        <p>Линейная характеристика: ${characteristics.linearCharacteristic}</p>
+        <p>Степень нелинейности: ${characteristics.nonlinearDegree}</p>
+    `;
+    
+    resultsContainer.appendChild(characteristicsDiv);
+    resultsContainer.style.display = 'block';
+    
+    downloadCsvBtn.style.display = 'inline-block';
 } 

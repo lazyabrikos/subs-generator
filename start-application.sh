@@ -28,7 +28,7 @@ sudo docker run -d -p 8081:8081 --name arx-calculator-cpp-backend --network subs
 
 # Собираем и запускаем Frontend
 echo -e "\n${BLUE}Собираем Frontend...${NC}"
-sudo docker build -t subs-generator-frontend -f Dockerfile.frontend .
+sudo docker build --no-cache -t subs-generator-frontend -f Dockerfile.frontend .
 
 echo -e "\n${BLUE}Запускаем Frontend...${NC}"
 sudo docker run -d -p 80:80 --name arx-calculator-frontend --network subs-generator_default subs-generator-frontend
