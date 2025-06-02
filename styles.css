@@ -9,6 +9,25 @@ body {
     line-height: 1.6;
     background-color: #f0f2f5;
     padding: 20px;
+    position: relative;
+}
+
+.download-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #1a73e8;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    z-index: 1000;
+}
+
+.download-btn:hover {
+    background-color: #0d62c7;
 }
 
 .container {

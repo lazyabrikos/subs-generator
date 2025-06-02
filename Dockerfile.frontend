@@ -4,6 +4,7 @@ FROM nginx:alpine
 COPY index.html /usr/share/nginx/html/
 COPY script.js /usr/share/nginx/html/
 COPY styles.css /usr/share/nginx/html/
+COPY manual.pdf /usr/share/nginx/html/
 
 # Создаем конфигурацию NGINX для проксирования API
 RUN echo 'server { \
@@ -14,6 +15,13 @@ RUN echo 'server { \
         root /usr/share/nginx/html; \
         index index.html; \
         try_files $uri $uri/ /index.html; \
+    } \
+    \
+    # Настройка для PDF файлов \
+    location ~* \.pdf$ { \
+        root /usr/share/nginx/html; \
+        add_header Content-Disposition "attachment"; \
+        add_header Content-Type "application/pdf"; \
     } \
     \
     # Проксирование API-запросов на бэкенд \
