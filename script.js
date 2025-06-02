@@ -4,13 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const calculateBtn = document.getElementById('calculate-btn');
     const resultsContainer = document.getElementById('results-container');
 
-    // Добавляем элемент для логов
     const debugLogContainer = document.createElement('div');
     debugLogContainer.id = 'debug-log';
     debugLogContainer.style.display = 'none';
     document.body.appendChild(debugLogContainer);
 
-    // Функция для логирования
     function logDebug(message) {
         console.log(message);
         const logEntry = document.createElement('div');
@@ -18,12 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
         debugLogContainer.appendChild(logEntry);
     }
 
-    // Включить логи для отладки
     window.showDebugLogs = function() {
         debugLogContainer.style.display = 'block';
     }
 
-    // Array of possible rotations as defined in the C++ code
     const ROTATES = [
         [1, 1],
         [1, 2],
@@ -44,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Generate pairs
         let pairsHTML = '';
         for (let i = 0; i < n; i++) {
             pairsHTML += `
@@ -88,21 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
         logDebug(`Собраны пары: ${pairsText}`);
 
         try {
-            // Show loading state
             calculateBtn.disabled = true;
             calculateBtn.textContent = 'Вычисление...';
             
-            // Используем относительный URL для API (NGINX проксирует запросы)
             const apiUrl = '/api/calculate';
             logDebug(`Отправка запроса на API: ${apiUrl}`);
             
-            // Подготавливаем данные для отправки
             const requestData = {
                 combinations: combinations
             };
             logDebug(`Данные для отправки: ${JSON.stringify(requestData)}`);
             
-            // Отправляем запрос на API
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -117,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
             }
 
-            // Получаем данные ответа
             const responseText = await response.text();
             logDebug(`Текст ответа: ${responseText.substring(0, 100)}...`);
             
@@ -130,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Ошибка при обработке ответа: ${parseError.message}`);
             }
             
-            // Display results
             resultsContainer.innerHTML = `
                 <h3>Результаты:</h3>
                 <p>Используемые пары: ${pairsText}</p>
@@ -172,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Validate all pairs and enable/disable the calculate button
 function validatePairs() {
     const nSelect = document.getElementById('n-select');
     const calculateBtn = document.getElementById('calculate-btn');

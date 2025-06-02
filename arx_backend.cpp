@@ -145,7 +145,6 @@ int compute_scalar_product(int x, int y) {
     return result;
 }
 
-// Основная функция
 vector<tuple<int, int, double>> compute_probability(const vector<int>& pi, int n) {
     vector<tuple<int, int, double>> probabilities;
     vector<vector<int>> matrix(256, vector<int>(256, 0));
@@ -173,7 +172,6 @@ vector<tuple<int, int, double>> compute_probability(const vector<int>& pi, int n
 }
 
 
-// Функция для вычисления линейной характеристики
 double calculateLinearCharacteristic(const vector<int>& substitution) {
     vector<tuple<int, int, double>> probabilities = compute_probability(substitution, 8);
     double delta = 0.0;
@@ -291,7 +289,6 @@ vector<int> madeInvSubs(const vector<int> & subs) {
     return invSubs;
 } 
 
-// Функция для вычисления степени нелинейности
 int calculateNonlinearDegree(const vector<int>& substitution) {
     vector<vector<int>> matrix = readMatrix("/app/D_matrix_nolinear.txt");
     if (matrix.empty()) {
@@ -308,31 +305,25 @@ int calculateNonlinearDegree(const vector<int>& substitution) {
 }
 
 int main() {
-    // Создаем простой HTTP сервер
     crow::SimpleApp app;
 
-    // Обработчик POST запроса для /api/calculate
     CROW_ROUTE(app, "/api/calculate").methods("POST"_method)
     ([](const crow::request& req) {
-        // Добавляем CORS заголовки напрямую в ответ
         crow::response response;
         response.add_header("Access-Control-Allow-Origin", "*");
         response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
         response.add_header("Access-Control-Allow-Headers", "Content-Type");
         
         try {
-            // Разбираем входящий JSON
             auto reqJson = json::parse(req.body);
             vector<pair<int, int>> combinations;
 
-            // Проверяем наличие необходимых полей
             if (!reqJson.contains("combinations")) {
                 response.code = 400;
                 response.body = "Bad Request: Missing 'combinations' field";
                 return response;
             }
 
-            // Преобразуем JSON массив в вектор пар
             for (const auto& combination : reqJson["combinations"]) {
                 if (combination.size() != 2) {
                     response.code = 400;
@@ -342,16 +333,13 @@ int main() {
                 combinations.push_back({combination[0], combination[1]});
             }
 
-            // Вызываем функцию для вычисления подстановки
             auto substitution = fullArxIteration(combinations);
 
-            // Вычисляем характеристики
             Characteristics characteristics;
             characteristics.diffCharacteristic = calculateDiffCharacteristic(substitution);
             characteristics.linearCharacteristic = calculateLinearCharacteristic(substitution);
             characteristics.nonlinearDegree = calculateNonlinearDegree(substitution);
 
-            // Формируем ответ в формате JSON
             json jsonResponse = {
                 {"substitution", substitution},
                 {"characteristics", {
@@ -375,7 +363,6 @@ int main() {
         }
     });
 
-    // Обработчик OPTIONS запроса для CORS preflight
     CROW_ROUTE(app, "/api/calculate").methods("OPTIONS"_method)
     ([](const crow::request&) {
         crow::response res;
@@ -386,12 +373,10 @@ int main() {
         return res;
     });
 
-    // Информационный маршрут для проверки работоспособности сервера
     CROW_ROUTE(app, "/")([]() {
         return "ARX Calculator Backend (C++)";
     });
 
-    // Запускаем сервер на порту 8081
     cout << "Starting C++ ARX Calculator Backend on port 8081..." << endl;
     app.port(8081).run();
 
