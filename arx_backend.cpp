@@ -115,8 +115,8 @@ double calculateDiffCharacteristic(const vector<int>& substitution) {
     vector<vector<int>> matrix(256, vector<int> (256, 0));
     for (int i = 0; i < V_n.size(); i++) {
         for (int j = 0; j < substitution.size(); j++) {
-            int x_a = substitution[j] ^ V_n[i];
-            int b = substitution[x_a] ^ substitution[i];
+            int x_a = j ^ V_n[i];
+            int b = substitution[x_a] ^ substitution[j];
             matrix[V_n[i]][b] += 1;
         }
     }

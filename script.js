@@ -195,7 +195,7 @@ function displayResults(data) {
     const characteristicsDiv = document.createElement('div');
     characteristicsDiv.innerHTML = `
         <h3>Характеристики:</h3>
-        <p>Дифференциальная характеристика: ${characteristics.diffCharacteristic}</p>
+        <p>Разностная характеристика: ${characteristics.diffCharacteristic}</p>
         <p>Линейная характеристика: ${characteristics.linearCharacteristic}</p>
         <p>Степень нелинейности: ${characteristics.nonlinearDegree}</p>
     `;
